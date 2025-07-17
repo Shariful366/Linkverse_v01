@@ -1,0 +1,218 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Custom animations for 2050 UI */
+@keyframes quantum-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7);
+  }
+  50% { 
+    box-shadow: 0 0 0 20px rgba(6, 182, 212, 0);
+  }
+}
+
+@keyframes neural-scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes biometric-auth {
+  0%, 100% { 
+    border-color: rgba(6, 182, 212, 0.5);
+    transform: scale(1);
+  }
+  50% { 
+    border-color: rgba(6, 182, 212, 1);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes hologram-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes data-stream {
+  0% { transform: translateY(100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-100%); opacity: 0; }
+}
+
+.quantum-pulse {
+  animation: quantum-pulse 2s infinite;
+}
+
+.neural-scan {
+  animation: neural-scan 2s infinite linear;
+}
+
+.biometric-auth {
+  animation: biometric-auth 3s infinite;
+}
+
+.hologram-flicker {
+  animation: hologram-flicker 4s infinite ease-in-out;
+}
+
+.data-stream {
+  animation: data-stream 3s infinite ease-in-out;
+}
+
+/* Glass morphism effects */
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Cyber grid background */
+.cyber-grid {
+  background-image: 
+    linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #06b6d4, #8b5cf6);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #0891b2, #7c3aed);
+}
+
+/* Custom focus styles */
+.focus-quantum:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.5);
+}
+
+/* Text gradient effects */
+.text-quantum {
+  background: linear-gradient(45deg, #06b6d4, #8b5cf6, #ec4899);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Neural network background effect */
+.neural-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.neural-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+  animation: neural-drift 20s ease-in-out infinite;
+}
+
+@keyframes neural-drift {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  33% { transform: translateX(-20px) translateY(-10px); }
+  66% { transform: translateX(20px) translateY(10px); }
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.1) 25%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0.1) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Hover effects */
+.hover-quantum {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-quantum:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Message bubble effects */
+.message-bubble {
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+
+.message-bubble::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  border-radius: inherit;
+  opacity: 0.8;
+}
+
+/* Security indicators */
+.security-indicator {
+  position: relative;
+}
+
+.security-indicator::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+  animation: pulse 2s infinite;
+}
+
+/* AI assistant glow */
+.ai-glow {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+}
+
+/* Live stream indicator */
+.live-indicator {
+  background: linear-gradient(45deg, #ef4444, #dc2626);
+  animation: pulse 1s infinite;
+}
+
+/* Quantum encryption badge */
+.quantum-badge {
+  background: linear-gradient(45deg, #10b981, #059669);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
