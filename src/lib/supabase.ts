@@ -256,15 +256,22 @@ export const api = {
   async getMeetings(userId: string): Promise<Meeting[]> {
     const { data, error } = await supabase
       .from('meetings')
-      .select(`
-        *,
-        meeting_participants!inner(user_id)
-      `)
-      .eq('meeting_participants.user_id', userId)
+      .select('*')
+      .or(`host_id.eq.${userId},id.in.(${await this.getUserMeetingIds(userId)})`)
       .order('scheduled_start', { ascending: true });
     
     if (error) throw error;
     return data || [];
+  },
+
+  async getUserMeetingIds(userId: string): Promise<string> {
+    const { data, error } = await supabase
+      .from('meeting_participants')
+      .select('meeting_id')
+      .eq('user_id', userId);
+    
+    if (error) return '';
+    return data.map(p => p.meeting_id).join(',') || '';
   },
 
   async createMeeting(meetingData: Partial<Meeting>): Promise<Meeting> {
