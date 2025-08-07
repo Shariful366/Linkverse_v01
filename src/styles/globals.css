@@ -2,6 +2,43 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+/* Mobile-first responsive design */
+@media (max-width: 640px) {
+  .mobile-hidden {
+    display: none;
+  }
+  
+  .mobile-full {
+    width: 100%;
+  }
+  
+  .mobile-stack {
+    flex-direction: column;
+  }
+}
+
+/* Enterprise-grade performance optimizations */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Improved touch targets for mobile */
+@media (max-width: 768px) {
+  button, input, select, textarea {
+    min-height: 44px;
+  }
+}
+
 /* Custom animations for 2050 UI */
 @keyframes quantum-pulse {
   0%, 100% { 

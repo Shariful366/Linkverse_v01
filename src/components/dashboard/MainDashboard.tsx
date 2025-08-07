@@ -10,11 +10,12 @@ import { CollaborationTools } from '../collaboration/CollaborationTools';
 import { QuantumMaps } from '../mapping/QuantumMaps';
 import { JobPlatform } from '../jobs/JobPlatform';
 import { HRTools } from '../hr/HRTools';
-import { MeetingPlatform } from '../meetings/MeetingPlatform';
+import { RevolutionaryMeeting2050 } from '../meetings/RevolutionaryMeeting2050';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const MainDashboard: React.FC = () => {
   const [activeChat, setActiveChat] = useState<string | null>(null);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showLiveStream, setShowLiveStream] = useState(false);
   const [showAI, setShowAI] = useState(false);
   const [showSecurity, setShowSecurity] = useState(false);
@@ -23,36 +24,45 @@ export const MainDashboard: React.FC = () => {
   const [showMaps, setShowMaps] = useState(false);
   const [showJobs, setShowJobs] = useState(false);
   const [showHR, setShowHR] = useState(false);
-  const [showMeetings, setShowMeetings] = useState(false);
+  const [showRevolutionaryMeeting, setShowRevolutionaryMeeting] = useState(false);
   const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
-      <div className="flex h-screen">
+      <div className="flex flex-col lg:flex-row h-screen">
         {/* Sidebar */}
-        <Sidebar 
-          onShowLiveStream={() => setShowLiveStream(true)}
-          onShowAI={() => setShowAI(true)}
-          onShowSecurity={() => setShowSecurity(true)}
-          onShowComprehensiveAI={() => setShowComprehensiveAI(true)}
-          onShowMaps={() => setShowMaps(true)}
-          onShowJobs={() => setShowJobs(true)}
-          onShowHR={() => setShowHR(true)}
-          onShowMeetings={() => setShowMeetings(true)}
-        />
+        <div className="lg:flex-shrink-0">
+          <Sidebar 
+            onShowLiveStream={() => setShowLiveStream(true)}
+            onShowAI={() => setShowAI(true)}
+            onShowSecurity={() => setShowSecurity(true)}
+            onShowComprehensiveAI={() => setShowComprehensiveAI(true)}
+            onShowMaps={() => setShowMaps(true)}
+            onShowJobs={() => setShowJobs(true)}
+            onShowHR={() => setShowHR(true)}
+            onShowRevolutionaryMeeting={() => setShowRevolutionaryMeeting(true)}
+          />
+        </div>
 
-        {/* Chat List */}
-        <ChatList 
-          onSelectChat={setActiveChat}
-          activeChat={activeChat}
-        />
+        <div className="flex flex-1 min-h-0">
+          {/* Chat List */}
+          <div className={`${activeChat ? 'hidden lg:block' : 'block'} lg:flex-shrink-0`}>
+            <ChatList 
+              onSelectChat={setActiveChat}
+              activeChat={activeChat}
+            />
+          </div>
 
-        {/* Main Chat Window */}
-        <EnhancedChatWindow 
-          activeChat={activeChat}
-          onStartLiveStream={() => setShowLiveStream(true)}
-          onOpenCollaboration={() => setShowCollaboration(true)}
-        />
+          {/* Main Chat Window */}
+          <div className="flex-1 min-w-0">
+            <EnhancedChatWindow 
+              activeChat={activeChat}
+              onStartLiveStream={() => setShowLiveStream(true)}
+              onOpenCollaboration={() => setShowCollaboration(true)}
+              onBack={() => setActiveChat(null)}
+            />
+          </div>
+        </div>
 
         {/* Modals */}
         {showLiveStream && (
@@ -87,8 +97,11 @@ export const MainDashboard: React.FC = () => {
           <HRTools onClose={() => setShowHR(false)} />
         )}
         
-        {showMeetings && (
-          <MeetingPlatform onClose={() => setShowMeetings(false)} />
+        {showRevolutionaryMeeting && (
+          <RevolutionaryMeeting2050 
+            meetingId="quantum-meeting-2050"
+            onClose={() => setShowRevolutionaryMeeting(false)} 
+          />
         )}
       </div>
     </div>

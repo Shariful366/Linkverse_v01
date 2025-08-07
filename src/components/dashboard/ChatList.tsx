@@ -99,12 +99,12 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, activeChat }) 
   };
 
   return (
-    <div className="w-80 bg-black/30 backdrop-blur-xl border-r border-gray-800/50 flex flex-col">
+    <div className="w-full sm:w-80 bg-black/30 backdrop-blur-xl border-r border-gray-800/50 flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b border-gray-800/50">
+      <div className="p-4 sm:p-6 border-b border-gray-800/50">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-white">Messages</h2>
-          <button className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center hover:bg-cyan-700 transition-colors">
+          <h2 className="text-lg sm:text-xl font-semibold text-white">Messages</h2>
+          <button className="w-7 h-7 sm:w-8 sm:h-8 bg-cyan-600 rounded-full flex items-center justify-center hover:bg-cyan-700 transition-colors">
             <Plus className="w-4 h-4 text-white" />
           </button>
         </div>
@@ -117,7 +117,7 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, activeChat }) 
             placeholder="Search messages..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors"
+            className="w-full pl-10 pr-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors text-sm sm:text-base"
           />
         </div>
       </div>
@@ -128,39 +128,39 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, activeChat }) 
           <div
             key={chat.id}
             onClick={() => onSelectChat(chat.id)}
-            className={`p-4 cursor-pointer transition-all hover:bg-gray-800/50 ${
+            className={`p-3 sm:p-4 cursor-pointer transition-all hover:bg-gray-800/50 ${
               activeChat === chat.id ? 'bg-cyan-600/20 border-r-2 border-cyan-500' : ''
             }`}
           >
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold ${getAvatarGradient(chat.type)}`}>
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base ${getAvatarGradient(chat.type)}`}>
                   {chat.avatar}
                 </div>
                 {chat.online && (
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-black"></div>
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full border-2 border-black"></div>
                 )}
               </div>
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <h3 className="font-semibold text-white truncate">{chat.name}</h3>
+                    <h3 className="font-semibold text-white truncate text-sm sm:text-base">{chat.name}</h3>
                     {getChatIcon(chat.type)}
                     {chat.encrypted && <Shield className="w-3 h-3 text-green-400" />}
                   </div>
-                  <span className="text-xs text-gray-400">{chat.time}</span>
+                  <span className="text-xs text-gray-400 hidden sm:inline">{chat.time}</span>
                 </div>
                 
                 <div className="flex items-center justify-between mt-1">
-                  <p className="text-sm text-gray-300 truncate">{chat.lastMessage}</p>
+                  <p className="text-xs sm:text-sm text-gray-300 truncate">{chat.lastMessage}</p>
                   <div className="flex items-center space-x-2">
                     {chat.unread > 0 && (
-                      <span className="bg-cyan-500 text-white text-xs rounded-full px-2 py-1 min-w-[1.5rem] h-6 flex items-center justify-center">
+                      <span className="bg-cyan-500 text-white text-xs rounded-full px-1.5 py-0.5 sm:px-2 sm:py-1 min-w-[1.25rem] sm:min-w-[1.5rem] h-5 sm:h-6 flex items-center justify-center">
                         {chat.unread}
                       </span>
                     )}
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1 hidden sm:flex">
                       <Zap className="w-3 h-3 text-yellow-400" />
                       <span className="text-xs text-gray-400">{chat.aiSafetyScore}</span>
                     </div>
@@ -173,8 +173,8 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, activeChat }) 
       </div>
 
       {/* Bottom Actions */}
-      <div className="p-4 border-t border-gray-800/50">
-        <div className="flex items-center justify-between text-sm text-gray-400">
+      <div className="p-3 sm:p-4 border-t border-gray-800/50">
+        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-400">
           <span>Quantum Encrypted</span>
           <Shield className="w-4 h-4 text-green-400" />
         </div>

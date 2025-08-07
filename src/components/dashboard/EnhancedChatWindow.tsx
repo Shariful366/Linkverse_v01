@@ -6,12 +6,14 @@ interface EnhancedChatWindowProps {
   activeChat: string | null;
   onStartLiveStream: () => void;
   onOpenCollaboration: () => void;
+  onBack?: () => void;
 }
 
 export const EnhancedChatWindow: React.FC<EnhancedChatWindowProps> = ({ 
   activeChat, 
   onStartLiveStream,
-  onOpenCollaboration 
+  onOpenCollaboration,
+  onBack
 }) => {
   const [message, setMessage] = useState('');
   const [showAI, setShowAI] = useState(false);
@@ -264,18 +266,27 @@ export const EnhancedChatWindow: React.FC<EnhancedChatWindowProps> = ({
       <div className="p-4 border-b border-gray-800/50 bg-black/20 backdrop-blur-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
+            {/* Back button for mobile */}
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="lg:hidden p-2 text-gray-400 hover:text-white transition-colors"
+              >
+                ←
+              </button>
+            )}
             <div className="relative">
-              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-semibold">SC</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-semibold text-sm sm:text-base">SC</span>
               </div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-black"></div>
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full border-2 border-black"></div>
             </div>
             <div>
               <h3 className="font-semibold text-white flex items-center space-x-2">
                 <span>Sarah Chen</span>
                 <Shield className="w-4 h-4 text-green-400" title="Quantum Encrypted" />
               </h3>
-              <div className="flex items-center space-x-2 text-sm text-gray-400">
+              <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-400">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span>Online • Last seen now</span>
                 {stealthMode && <Eye className="w-3 h-3 text-purple-400" title="Stealth Mode Active" />}
@@ -284,67 +295,67 @@ export const EnhancedChatWindow: React.FC<EnhancedChatWindowProps> = ({
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto">
             <button
               onClick={() => setShowSocialFeatures(!showSocialFeatures)}
-              className={`p-2 rounded-lg transition-all hover-quantum ${showSocialFeatures ? 'bg-pink-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+              className={`p-1.5 sm:p-2 rounded-lg transition-all hover-quantum ${showSocialFeatures ? 'bg-pink-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
               title="Social Features"
             >
-              <Heart className="w-5 h-5" />
+              <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={() => setShowGaming(!showGaming)}
-              className={`p-2 rounded-lg transition-all hover-quantum ${showGaming ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+              className={`p-1.5 sm:p-2 rounded-lg transition-all hover-quantum ${showGaming ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
               title="Gaming"
             >
-              <Gamepad2 className="w-5 h-5" />
+              <Gamepad2 className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={() => setShowCommerce(!showCommerce)}
-              className={`p-2 rounded-lg transition-all hover-quantum ${showCommerce ? 'bg-yellow-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+              className={`p-1.5 sm:p-2 rounded-lg transition-all hover-quantum ${showCommerce ? 'bg-yellow-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
               title="Commerce"
             >
-              <ShoppingCart className="w-5 h-5" />
+              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={onOpenCollaboration}
-              className="p-2 bg-indigo-600 rounded-lg text-white hover:bg-indigo-700 transition-colors hover-quantum"
+              className="p-1.5 sm:p-2 bg-indigo-600 rounded-lg text-white hover:bg-indigo-700 transition-colors hover-quantum"
               title="Collaboration Tools"
             >
-              <FileText className="w-5 h-5" />
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={() => setStealthMode(!stealthMode)}
-              className={`p-2 rounded-lg transition-all hover-quantum ${stealthMode ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+              className={`p-1.5 sm:p-2 rounded-lg transition-all hover-quantum ${stealthMode ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
               title="Stealth Security Mode"
             >
-              <Eye className="w-5 h-5" />
+              <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={() => setAiTranslate(!aiTranslate)}
-              className={`p-2 rounded-lg transition-all hover-quantum ${aiTranslate ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+              className={`p-1.5 sm:p-2 rounded-lg transition-all hover-quantum ${aiTranslate ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
               title="AI Real-time Translation"
             >
-              <Globe className="w-5 h-5" />
+              <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <button className="p-2 bg-gray-800 rounded-lg text-gray-400 hover:bg-gray-700 transition-colors hover-quantum">
-              <Phone className="w-5 h-5" />
+            <button className="p-1.5 sm:p-2 bg-gray-800 rounded-lg text-gray-400 hover:bg-gray-700 transition-colors hover-quantum">
+              <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button 
               onClick={() => setIsVideoCall(!isVideoCall)}
-              className={`p-2 rounded-lg transition-all hover-quantum ${isVideoCall ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+              className={`p-1.5 sm:p-2 rounded-lg transition-all hover-quantum ${isVideoCall ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
             >
-              <Video className="w-5 h-5" />
+              <Video className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button 
               onClick={onStartLiveStream}
-              className="p-2 bg-red-600 rounded-lg text-white hover:bg-red-700 transition-colors hover-quantum live-indicator"
+              className="p-1.5 sm:p-2 bg-red-600 rounded-lg text-white hover:bg-red-700 transition-colors hover-quantum live-indicator"
               title="Start Live Stream"
             >
-              <Users className="w-5 h-5" />
+              <Users className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <button className="p-2 bg-gray-800 rounded-lg text-gray-400 hover:bg-gray-700 transition-colors hover-quantum">
-              <MoreVertical className="w-5 h-5" />
+            <button className="p-1.5 sm:p-2 bg-gray-800 rounded-lg text-gray-400 hover:bg-gray-700 transition-colors hover-quantum">
+              <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
@@ -546,13 +557,13 @@ export const EnhancedChatWindow: React.FC<EnhancedChatWindowProps> = ({
 
       {/* Message Input */}
       <div className="p-4 border-t border-gray-800/50 bg-black/20 backdrop-blur-xl">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           <button
             onClick={() => setShowAI(!showAI)}
-            className={`p-3 rounded-xl transition-all hover-quantum ${showAI ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+            className={`p-2 sm:p-3 rounded-xl transition-all hover-quantum ${showAI ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
             title="Vision AI Assistant"
           >
-            <Bot className="w-5 h-5" />
+            <Bot className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
           
           <div className="flex-1 relative">
@@ -562,15 +573,15 @@ export const EnhancedChatWindow: React.FC<EnhancedChatWindowProps> = ({
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type a quantum-secured message..."
-              className="w-full p-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors focus-quantum pr-32"
+              className="w-full p-3 sm:p-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors focus-quantum pr-24 sm:pr-32 text-sm sm:text-base"
             />
             
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+            <div className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1 sm:space-x-2">
               <button
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 className="text-gray-400 hover:text-gray-300 transition-colors"
               >
-                <Smile className="w-5 h-5" />
+                <Smile className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <input
                 type="file"
@@ -583,41 +594,41 @@ export const EnhancedChatWindow: React.FC<EnhancedChatWindowProps> = ({
                 htmlFor="file-upload"
                 className="text-gray-400 hover:text-gray-300 transition-colors cursor-pointer"
               >
-                <Paperclip className="w-5 h-5" />
+                <Paperclip className="w-4 h-4 sm:w-5 sm:h-5" />
               </label>
-              <button className="text-gray-400 hover:text-gray-300 transition-colors">
-                <Image className="w-5 h-5" />
+              <button className="text-gray-400 hover:text-gray-300 transition-colors hidden sm:block">
+                <Image className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
-              <button className="text-gray-400 hover:text-gray-300 transition-colors">
-                <Music className="w-5 h-5" />
+              <button className="text-gray-400 hover:text-gray-300 transition-colors hidden sm:block">
+                <Music className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
 
           <button
             onClick={toggleRecording}
-            className={`p-3 rounded-xl transition-all hover-quantum ${isRecording ? 'bg-red-600 text-white animate-pulse' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+            className={`p-2 sm:p-3 rounded-xl transition-all hover-quantum ${isRecording ? 'bg-red-600 text-white animate-pulse' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
             title="AI Voice Recording"
           >
-            <Mic className="w-5 h-5" />
+            <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
-          <button className="p-3 bg-gray-800 rounded-xl text-gray-400 hover:bg-gray-700 transition-colors hover-quantum">
-            <Camera className="w-5 h-5" />
+          <button className="p-2 sm:p-3 bg-gray-800 rounded-xl text-gray-400 hover:bg-gray-700 transition-colors hover-quantum">
+            <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           <button
             onClick={handleSendMessage}
             disabled={!message.trim() && !isRecording}
-            className="p-3 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-xl text-white hover:from-cyan-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover-quantum"
+            className="p-2 sm:p-3 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-xl text-white hover:from-cyan-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover-quantum"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {/* Security Status Bar */}
-        <div className="flex items-center justify-between mt-3 text-xs text-gray-400">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3 space-y-2 sm:space-y-0 text-xs text-gray-400">
+          <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto">
             <div className="flex items-center space-x-1">
               <Shield className="w-3 h-3 text-green-400" />
               <span>Quantum Encrypted</span>
