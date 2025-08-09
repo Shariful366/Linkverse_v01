@@ -4,7 +4,29 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Linkverse 2050 - Revolutionary quantum-encrypted communication platform" />
+    <meta name="theme-color" content="#0891b2" />
     <title>Linkverse - 2050 Messaging Platform</title>
+    <style>
+      /* Prevent flash of unstyled content */
+      body {
+        background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #1e293b 100%);
+        margin: 0;
+        font-family: Inter, system-ui, sans-serif;
+      }
+      
+      /* Loading fallback */
+      #root:empty::before {
+        content: "Loading Linkverse 2050...";
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

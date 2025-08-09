@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, DEMO_MODE } from '../lib/supabase';
 
 interface User {
   id: string;
@@ -60,6 +60,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string, method = 'email') => {
     setIsLoading(true);
     try {
+      if (DEMO_MODE) {
+        // Demo mode - simulate successful login
+        setUser({
+          id: 'demo-user-id',
+          name: 'Demo User',
+          email: email,
+          securityLevel: 'quantum',
+          biometricEnabled: true,
+          geoLockEnabled: true
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -87,6 +101,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signUp = async (email: string, password: string, userData?: any) => {
     setIsLoading(true);
     try {
+      if (DEMO_MODE) {
+        // Demo mode - simulate successful signup
+        setUser({
+          id: 'demo-user-id',
+          name: userData?.display_name || 'Demo User',
+          email: email,
+          securityLevel: 'quantum',
+          biometricEnabled: true,
+          geoLockEnabled: true
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -115,7 +143,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(false);
   };
   const logout = async () => {
-    await supabase.auth.signOut();
+    if (!DEMO_MODE) {
+      await supabase.auth.signOut();
+    }
     setUser(null);
   };
 

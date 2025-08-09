@@ -6,19 +6,42 @@ export default {
     extend: {
       screens: {
         'xs': '475px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
         '3xl': '1600px',
       },
       spacing: {
+        '14': '3.5rem',
+        '16': '4rem',
         '18': '4.5rem',
+        '20': '5rem',
+        '72': '18rem',
+        '80': '20rem',
         '88': '22rem',
+        '96': '24rem',
         '128': '32rem',
+      },
+      fontSize: {
+        'xs': ['0.75rem', { lineHeight: '1rem' }],
+        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+        'base': ['1rem', { lineHeight: '1.5rem' }],
+        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem' }],
+        '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
+        'slide-in-right': 'slideInRight 0.3s ease-out',
+        'slide-in-left': 'slideInLeft 0.3s ease-out',
         'quantum-pulse': 'quantumPulse 2s infinite',
         'neural-scan': 'neuralScan 2s infinite linear',
         'data-stream': 'dataStream 3s infinite ease-in-out',
+        'bounce-in': 'bounceIn 0.6s ease-out',
       },
       keyframes: {
         fadeIn: {
@@ -28,6 +51,20 @@ export default {
         slideUp: {
           '0%': { transform: 'translateY(100%)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        slideInRight: {
+          '0%': { transform: 'translateX(100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideInLeft: {
+          '0%': { transform: 'translateX(-100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        bounceIn: {
+          '0%': { transform: 'scale(0.3)', opacity: '0' },
+          '50%': { transform: 'scale(1.05)' },
+          '70%': { transform: 'scale(0.9)' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
         },
         quantumPulse: {
           '0%, 100%': { 
