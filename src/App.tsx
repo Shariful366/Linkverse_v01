@@ -2,28 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Router } from './components/Router';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { LoadingScreen } from './components/LoadingScreen';
 import './styles/globals.css';
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // App initialization with error handling
-    const initializeApp = async () => {
-      try {
-        // Simulate app initialization
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setIsLoading(false);
-      } catch (err) {
-        setError('Failed to initialize Linkverse 2050');
-        setIsLoading(false);
-      }
-    };
-
-    initializeApp();
-  }, []);
 
   if (error) {
     return (
@@ -40,10 +22,6 @@ function App() {
         </div>
       </div>
     );
-  }
-
-  if (isLoading) {
-    return <LoadingScreen />;
   }
 
   return (

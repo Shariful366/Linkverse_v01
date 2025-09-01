@@ -3,11 +3,7 @@ import { Shield, Fingerprint, Smartphone, Mail, Eye, EyeOff, UserPlus, Building,
 import { useAuth } from '../../contexts/AuthContext';
 import { BiometricAuth } from './BiometricAuth';
 
-interface LoginScreenProps {
-  onLogin: () => void;
-}
-
-export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
+export const LoginScreen: React.FC = () => {
   const [loginMethod, setLoginMethod] = useState<'email' | 'phone' | 'biometric'>('email');
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [showPassword, setShowPassword] = useState(false);
@@ -28,33 +24,35 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (authMode === 'login') {
-      await login(formData.email || formData.phone, formData.password, loginMethod);
-      onLogin();
-    } else {
-      if (formData.password !== formData.confirmPassword) {
-        alert('Passwords do not match');
-        return;
+    try {
+      if (authMode === 'login') {
+        await login(formData.email || formData.phone, formData.password, loginMethod);
+      } else {
+        if (formData.password !== formData.confirmPassword) {
+          alert('Passwords do not match');
+          return;
+        }
+        if (!formData.acceptTerms) {
+          alert('Please accept the terms and conditions');
+          return;
+        }
+        
+        await signUp(formData.email, formData.password, {
+          display_name: formData.displayName,
+          username: formData.username,
+          company: formData.company,
+          job_title: formData.jobTitle
+        });
       }
-      if (!formData.acceptTerms) {
-        alert('Please accept the terms and conditions');
-        return;
-      }
-      
-      await signUp(formData.email, formData.password, {
-        display_name: formData.displayName,
-        username: formData.username,
-        company: formData.company,
-        job_title: formData.jobTitle
-      });
-      onLogin();
+    } catch (error) {
+      console.error('Authentication error:', error);
+      alert('Authentication failed. Please try again.');
     }
   };
 
   const handleSocialLogin = (provider: 'google' | 'apple') => {
     // Simulate social login
     login(`${provider}@linkverse.com`, '', provider);
-    onLogin();
   };
 
   return (

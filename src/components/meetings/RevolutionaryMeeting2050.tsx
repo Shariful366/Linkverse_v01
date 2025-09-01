@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Video, Users, Brain, Zap, Globe, Shield, Eye, Layers, Sparkles, Bot, Camera, Mic, Monitor, Share2, Settings, Phone, MessageSquare, FileText, Calendar, Award, Target, TrendingUp, Volume2, Headphones, MicOff, VideoOff, Hand, Gamepad2, Compass, Navigation, Star, Heart, X } from 'lucide-react';
+import { CalendarIntegration } from './CalendarIntegration';
 
 interface RevolutionaryMeeting2050Props {
   meetingId: string;
@@ -41,6 +42,7 @@ export const RevolutionaryMeeting2050: React.FC<RevolutionaryMeeting2050Props> =
   const [realityBlending, setRealityBlending] = useState(85);
   const [consciousnessLevel, setConsciousnessLevel] = useState(92);
   const [meetingMode, setMeetingMode] = useState<'standard' | 'neural' | 'quantum' | 'transcendent'>('quantum');
+  const [showCalendar, setShowCalendar] = useState(false);
   const [participants, setParticipants] = useState<QuantumParticipant[]>([]);
   const [dimensions, setDimensions] = useState<MeetingDimension[]>([]);
 
@@ -203,6 +205,13 @@ export const RevolutionaryMeeting2050: React.FC<RevolutionaryMeeting2050Props> =
                 <span className="text-purple-400 text-xs sm:text-sm font-semibold">Quantum Active</span>
               </div>
               <button
+                onClick={() => setShowCalendar(!showCalendar)}
+                className="px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 rounded-lg text-white hover:bg-blue-700 transition-colors text-sm flex items-center space-x-2"
+              >
+                <Calendar className="w-4 h-4" />
+                <span className="hidden sm:inline">Calendar</span>
+              </button>
+              <button
                 onClick={onClose}
                 className="px-3 py-2 sm:px-4 sm:py-2 bg-red-600 rounded-lg text-white hover:bg-red-700 transition-colors text-sm"
               >
@@ -235,6 +244,23 @@ export const RevolutionaryMeeting2050: React.FC<RevolutionaryMeeting2050Props> =
             ))}
           </div>
         </div>
+
+        {/* Calendar Integration */}
+        {showCalendar && (
+          <div className="absolute inset-4 bg-black/90 backdrop-blur-xl rounded-xl border border-blue-500/30 z-10 overflow-y-auto">
+            <CalendarIntegration 
+              onClose={() => setShowCalendar(false)}
+              meetingData={{
+                title: 'Revolutionary Quantum Meeting',
+                description: 'Multi-dimensional consciousness collaboration',
+                startTime: new Date().toISOString(),
+                endTime: new Date(Date.now() + 3600000).toISOString(),
+                participants: participants.map(p => p.name),
+                meetingId: meetingId
+              }}
+            />
+          </div>
+        )}
 
         {/* Main Meeting Interface */}
         <div className="flex-1 flex flex-col lg:flex-row">

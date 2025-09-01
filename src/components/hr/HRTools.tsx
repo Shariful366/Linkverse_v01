@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, DollarSign, Calendar, FileText, TrendingUp, Brain, Zap, Shield, Clock, Award, Target, CreditCard, Building, User, Bot, Eye, Heart, MessageSquare, Settings, Download, Upload, Search, Filter, Plus, X, CheckCircle, AlertTriangle, MapPin, Phone, Mail } from 'lucide-react';
+import { AttendanceSystem } from './AttendanceSystem';
 
 interface HRToolsProps {
   onClose: () => void;
@@ -370,139 +371,11 @@ export const HRTools: React.FC<HRToolsProps> = ({ onClose }) => {
           <div className="flex-1 overflow-y-auto p-3 sm:p-6">
             {/* Attendance Tab */}
             {activeTab === 'attendance' && (
-              <div className="space-y-4 sm:space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                  <h2 className="text-lg sm:text-xl font-bold text-white">Attendance Management</h2>
-                  <div className="flex space-x-2">
-                    <button className="px-3 sm:px-4 py-2 bg-blue-600 rounded-lg text-white hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm">
-                      <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span>Mark Attendance</span>
-                    </button>
-                    <button className="px-3 sm:px-4 py-2 bg-green-600 rounded-lg text-white hover:bg-green-700 transition-colors flex items-center space-x-2 text-sm">
-                      <Brain className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span>AI Analysis</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Attendance Summary Cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-                  <div className="bg-black/30 rounded-xl p-3 sm:p-4 border border-green-500/20">
-                    <div className="flex items-center justify-between mb-2">
-                      <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
-                      <span className="text-lg sm:text-2xl font-bold text-white">82</span>
-                    </div>
-                    <p className="text-gray-400 text-xs sm:text-sm">Present Today</p>
-                    <p className="text-green-400 text-xs">95.3% attendance</p>
-                  </div>
-
-                  <div className="bg-black/30 rounded-xl p-3 sm:p-4 border border-yellow-500/20">
-                    <div className="flex items-center justify-between mb-2">
-                      <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400" />
-                      <span className="text-lg sm:text-2xl font-bold text-white">3</span>
-                    </div>
-                    <p className="text-gray-400 text-xs sm:text-sm">Late Arrivals</p>
-                    <p className="text-yellow-400 text-xs">Traffic delays</p>
-                  </div>
-
-                  <div className="bg-black/30 rounded-xl p-3 sm:p-4 border border-blue-500/20">
-                    <div className="flex items-center justify-between mb-2">
-                      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
-                      <span className="text-lg sm:text-2xl font-bold text-white">28</span>
-                    </div>
-                    <p className="text-gray-400 text-xs sm:text-sm">Remote Work</p>
-                    <p className="text-blue-400 text-xs">Hybrid model</p>
-                  </div>
-
-                  <div className="bg-black/30 rounded-xl p-3 sm:p-4 border border-red-500/20">
-                    <div className="flex items-center justify-between mb-2">
-                      <AlertTriangle className="w-6 h-6 sm:w-8 sm:h-8 text-red-400" />
-                      <span className="text-lg sm:text-2xl font-bold text-white">1</span>
-                    </div>
-                    <p className="text-gray-400 text-xs sm:text-sm">Absent</p>
-                    <p className="text-red-400 text-xs">Sick leave</p>
-                  </div>
-                </div>
-
-                {/* Attendance Filter */}
-                <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                  <div className="flex space-x-2">
-                    {['today', 'week', 'month'].map((filter) => (
-                      <button
-                        key={filter}
-                        onClick={() => setAttendanceFilter(filter as any)}
-                        className={`px-3 py-1 rounded-lg text-xs sm:text-sm transition-all ${
-                          attendanceFilter === filter
-                            ? 'bg-green-600 text-white'
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        }`}
-                      >
-                        {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      placeholder="Search attendance records..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-green-500/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-green-500 text-sm"
-                    />
-                  </div>
-                </div>
-
-                {/* Attendance Records */}
-                <div className="space-y-3 sm:space-y-4">
-                  {filteredAttendance.map((record) => (
-                    <div key={record.id} className="bg-black/30 rounded-xl p-4 sm:p-6 border border-green-500/20">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                        <div className="flex items-center space-x-3 sm:space-x-4">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                            {record.employeeName.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-white text-sm sm:text-base">{record.employeeName}</h3>
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-1 sm:space-y-0 text-xs sm:text-sm text-gray-400">
-                              <span>{record.date}</span>
-                              <span>{record.location}</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                          <div className="grid grid-cols-2 sm:flex sm:space-x-4 gap-2 sm:gap-0 text-xs sm:text-sm">
-                            <div className="text-center sm:text-left">
-                              <p className="text-gray-400">Check In</p>
-                              <p className="text-green-400 font-semibold">{record.checkIn}</p>
-                            </div>
-                            <div className="text-center sm:text-left">
-                              <p className="text-gray-400">Check Out</p>
-                              <p className="text-blue-400 font-semibold">{record.checkOut}</p>
-                            </div>
-                            <div className="text-center sm:text-left">
-                              <p className="text-gray-400">Total Hours</p>
-                              <p className="text-purple-400 font-semibold">{record.totalHours}h</p>
-                            </div>
-                            <div className="text-center sm:text-left">
-                              <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(record.status)}`}>
-                                {record.status.replace('-', ' ').toUpperCase()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {record.notes && (
-                        <div className="mt-3 p-3 bg-gray-800/50 rounded-lg">
-                          <p className="text-gray-300 text-xs sm:text-sm">{record.notes}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <AttendanceSystem 
+                onAttendanceUpdate={(data) => {
+                  console.log('Attendance updated:', data);
+                }}
+              />
             )}
 
             {/* Leave Management Tab */}

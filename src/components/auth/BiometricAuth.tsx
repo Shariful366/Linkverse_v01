@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Fingerprint, Eye, Mic, CheckCircle } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface BiometricAuthProps {
-  onSuccess: () => void;
 }
 
-export const BiometricAuth: React.FC<BiometricAuthProps> = ({ onSuccess }) => {
+export const BiometricAuth: React.FC<BiometricAuthProps> = () => {
   const [selectedMethod, setSelectedMethod] = useState<'fingerprint' | 'face' | 'voice'>('fingerprint');
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
+  const { login } = useAuth();
 
   const startScan = async () => {
     setIsScanning(true);
@@ -20,7 +21,9 @@ export const BiometricAuth: React.FC<BiometricAuthProps> = ({ onSuccess }) => {
         if (prev >= 100) {
           clearInterval(interval);
           setIsScanning(false);
-          setTimeout(onSuccess, 500);
+          setTimeout(() => {
+            login('biometric@linkverse.com', '', 'biometric');
+          }, 500);
           return 100;
         }
         return prev + 10;
