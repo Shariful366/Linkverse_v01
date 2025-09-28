@@ -1,79 +1,179 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { supabase, DEMO_MODE } from '../lib/supabase';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface User {
   id: string;
-  name: string;
   email: string;
-  avatar?: string;
-  securityLevel: 'quantum' | 'enterprise' | 'standard';
-  biometricEnabled: boolean;
-  geoLockEnabled: boolean;
+  phone?: string;
+  displayName: string;
+  username: string;
+  accountType: 'individual' | 'enterprise';
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  role: 'user' | 'admin' | 'enterprise_admin' | 'super_admin';
+  enterpriseId?: string;
+  profile?: any;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, method?: string) => Promise<void>;
-  logout: () => void;
-  isLoading: boolean;
-  signUp: (email: string, password: string, userData?: any) => Promise<void>;
+  loading: boolean;
+  signUp: (data: SignUpData) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signInWithPhone: (phone: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  resendVerification: (type: 'email' | 'phone') => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updateProfile: (updates: Partial<User>) => Promise<void>;
+}
+
+interface SignUpData {
+  email?: string;
+  phone?: string;
+  password: string;
+  displayName: string;
+  username: string;
+  accountType: 'individual' | 'enterprise';
+  companyName?: string;
+  jobTitle?: string;
+  industry?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Check for existing session on mount
-  React.useEffect(() => {
+  useEffect(() => {
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        setUser({
-          id: session.user.id,
-          name: session.user.user_metadata?.display_name || 'User',
-          email: session.user.email || '',
-          securityLevel: 'quantum',
-          biometricEnabled: true,
-          geoLockEnabled: true
-        });
+        loadUserProfile(session.user);
+      } else {
+        setLoading(false);
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        setUser({
-          id: session.user.id,
-          name: session.user.user_metadata?.display_name || 'User',
-          email: session.user.email || '',
-          securityLevel: 'quantum',
-          biometricEnabled: true,
-          geoLockEnabled: true
-        });
+        await loadUserProfile(session.user);
       } else {
         setUser(null);
+        setLoading(false);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
-  const login = async (email: string, password: string, method = 'email') => {
-    setIsLoading(true);
+
+  const loadUserProfile = async (authUser: SupabaseUser) => {
     try {
-      if (DEMO_MODE) {
-        // Demo mode - simulate successful login
-        setUser({
-          id: 'demo-user-id',
-          name: 'Demo User',
-          email: email,
-          securityLevel: 'quantum',
-          biometricEnabled: true,
-          geoLockEnabled: true
-        });
-        setIsLoading(false);
+      const { data: profile, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading profile:', error);
+        setLoading(false);
         return;
       }
 
+      if (profile) {
+        setUser({
+          id: authUser.id,
+          email: authUser.email || '',
+          phone: authUser.phone || profile.phone,
+          displayName: profile.display_name || 'User',
+          username: profile.username || 'user',
+          accountType: profile.account_type || 'individual',
+          emailVerified: authUser.email_confirmed_at !== null,
+          phoneVerified: authUser.phone_confirmed_at !== null,
+          role: profile.role || 'user',
+          enterpriseId: profile.enterprise_id,
+          profile
+        });
+      }
+    } catch (error) {
+      console.error('Error in loadUserProfile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signUp = async (data: SignUpData) => {
+    setLoading(true);
+    try {
+      const authData: any = {
+        password: data.password,
+        options: {
+          data: {
+            display_name: data.displayName,
+            username: data.username,
+            account_type: data.accountType,
+            company_name: data.companyName,
+            job_title: data.jobTitle,
+            industry: data.industry
+          }
+        }
+      };
+
+      // Use email or phone for signup
+      if (data.email) {
+        authData.email = data.email;
+      } else if (data.phone) {
+        authData.phone = data.phone;
+      } else {
+        throw new Error('Email or phone number is required');
+      }
+
+      const { data: authResult, error } = await supabase.auth.signUp(authData);
+
+      if (error) throw error;
+
+      if (authResult.user) {
+        // If enterprise account, create organization
+        if (data.accountType === 'enterprise' && data.companyName) {
+          const { data: org, error: orgError } = await supabase
+            .from('organizations')
+            .insert({
+              name: data.companyName,
+              industry: data.industry,
+              created_by: authResult.user.id
+            })
+            .select()
+            .single();
+
+          if (!orgError && org) {
+            // Update user profile with enterprise_id
+            await supabase
+              .from('user_profiles')
+              .update({
+                enterprise_id: org.id,
+                role: 'enterprise_admin'
+              })
+              .eq('user_id', authResult.user.id);
+          }
+        }
+      }
+
+      // Don't set user here - wait for email/phone verification
+      alert('Please check your email/phone for verification link before signing in.');
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      throw new Error(error.message || 'Sign up failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    setLoading(true);
+    try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -82,75 +182,121 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (error) throw error;
 
       if (data.user) {
-        setUser({
-          id: data.user.id,
-          name: data.user.user_metadata?.display_name || 'User',
-          email: data.user.email || '',
-          securityLevel: 'quantum',
-          biometricEnabled: true,
-          geoLockEnabled: true
-        });
+        // Check if email is verified
+        if (!data.user.email_confirmed_at) {
+          await supabase.auth.signOut();
+          throw new Error('Please verify your email before signing in.');
+        }
+        
+        await loadUserProfile(data.user);
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      throw new Error(error.message || 'Sign in failed');
+    } finally {
+      setLoading(false);
     }
-    setIsLoading(false);
   };
 
-  const signUp = async (email: string, password: string, userData?: any) => {
-    setIsLoading(true);
+  const signInWithPhone = async (phone: string, password: string) => {
+    setLoading(true);
     try {
-      if (DEMO_MODE) {
-        // Demo mode - simulate successful signup
-        setUser({
-          id: 'demo-user-id',
-          name: userData?.display_name || 'Demo User',
-          email: email,
-          securityLevel: 'quantum',
-          biometricEnabled: true,
-          geoLockEnabled: true
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: userData
-        }
+      const { data, error } = await supabase.auth.signInWithPassword({
+        phone,
+        password
       });
 
       if (error) throw error;
 
       if (data.user) {
-        // Create user profile
-        await supabase
-          .from('user_profiles')
-          .insert({
-            user_id: data.user.id,
-            username: userData?.username || email.split('@')[0],
-            display_name: userData?.display_name || 'User',
-            email: email
-          });
+        // Check if phone is verified
+        if (!data.user.phone_confirmed_at) {
+          await supabase.auth.signOut();
+          throw new Error('Please verify your phone number before signing in.');
+        }
+        
+        await loadUserProfile(data.user);
       }
-    } catch (error) {
-      console.error('Sign up error:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('Phone sign in error:', error);
+      throw new Error(error.message || 'Phone sign in failed');
+    } finally {
+      setLoading(false);
     }
-    setIsLoading(false);
   };
-  const logout = async () => {
-    if (!DEMO_MODE) {
-      await supabase.auth.signOut();
+
+  const signOut = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setUser(null);
+    } catch (error: any) {
+      console.error('Sign out error:', error);
+      throw new Error(error.message || 'Sign out failed');
+    } finally {
+      setLoading(false);
     }
-    setUser(null);
+  };
+
+  const resendVerification = async (type: 'email' | 'phone') => {
+    try {
+      if (type === 'email') {
+        const { error } = await supabase.auth.resend({
+          type: 'signup',
+          email: user?.email || ''
+        });
+        if (error) throw error;
+      } else {
+        // Phone verification resend would go here
+        console.log('Phone verification resend not implemented yet');
+      }
+    } catch (error: any) {
+      console.error('Resend verification error:', error);
+      throw new Error(error.message || 'Failed to resend verification');
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Reset password error:', error);
+      throw new Error(error.message || 'Failed to reset password');
+    }
+  };
+
+  const updateProfile = async (updates: Partial<User>) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update(updates)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setUser(prev => prev ? { ...prev, ...updates } : null);
+    } catch (error: any) {
+      console.error('Update profile error:', error);
+      throw new Error(error.message || 'Failed to update profile');
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, signUp }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      signUp,
+      signIn,
+      signInWithPhone,
+      signOut,
+      resendVerification,
+      resetPassword,
+      updateProfile
+    }}>
       {children}
     </AuthContext.Provider>
   );

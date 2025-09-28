@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Users, MapPin, QrCode, Share2, Copy, Download, Mail, MessageSquare, Video, Phone, Globe, Shield, Bot, Zap, Star, CheckCircle, AlertTriangle, Plus, X } from 'lucide-react';
+import { Calendar, Clock, Users, MapPin, QrCode, Share2, Copy, Download, Mail, MessageSquare, Video, Phone, Globe, Shield, Bot, Zap, Star, CheckCircle, AlertTriangle, Plus, X, Scan } from 'lucide-react';
 
 interface CalendarIntegrationProps {
   meetingData?: {
@@ -104,18 +104,43 @@ export const CalendarIntegration: React.FC<CalendarIntegrationProps> = ({
   };
 
   const generateQRCode = (meetingId: string): string => {
-    // Generate QR code data URL (simulated)
+    // Generate a more detailed QR code SVG
     const qrData = `https://linkverse.2050/meet/${meetingId}`;
+    const size = 200;
+    const moduleSize = 8;
+    const modules = size / moduleSize;
+    
+    let qrPattern = '';
+    for (let i = 0; i < modules; i++) {
+      for (let j = 0; j < modules; j++) {
+        // Create a pseudo-random pattern based on meeting ID
+        const hash = meetingId.charCodeAt((i + j) % meetingId.length);
+        if ((hash + i + j) % 3 === 0) {
+          qrPattern += `<rect x="${j * moduleSize}" y="${i * moduleSize}" width="${moduleSize}" height="${moduleSize}" fill="black"/>`;
+        }
+      }
+    }
+    
     return `data:image/svg+xml;base64,${btoa(`
-      <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-        <rect width="200" height="200" fill="white"/>
-        <rect x="20" y="20" width="160" height="160" fill="none" stroke="black" stroke-width="2"/>
-        <text x="100" y="100" text-anchor="middle" fill="black" font-size="12">QR Code</text>
-        <text x="100" y="120" text-anchor="middle" fill="black" font-size="8">${meetingId}</text>
-        <rect x="40" y="40" width="20" height="20" fill="black"/>
-        <rect x="140" y="40" width="20" height="20" fill="black"/>
-        <rect x="40" y="140" width="20" height="20" fill="black"/>
-        <rect x="80" y="80" width="40" height="40" fill="black"/>
+      <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${size}" height="${size}" fill="white"/>
+        ${qrPattern}
+        <!-- Finder patterns -->
+        <rect x="0" y="0" width="56" height="56" fill="black"/>
+        <rect x="8" y="8" width="40" height="40" fill="white"/>
+        <rect x="16" y="16" width="24" height="24" fill="black"/>
+        
+        <rect x="144" y="0" width="56" height="56" fill="black"/>
+        <rect x="152" y="8" width="40" height="40" fill="white"/>
+        <rect x="160" y="16" width="24" height="24" fill="black"/>
+        
+        <rect x="0" y="144" width="56" height="56" fill="black"/>
+        <rect x="8" y="152" width="40" height="40" fill="white"/>
+        <rect x="16" y="160" width="24" height="24" fill="black"/>
+        
+        <!-- Center alignment pattern -->
+        <rect x="88" y="88" width="24" height="24" fill="black"/>
+        <rect x="96" y="96" width="8" height="8" fill="white"/>
       </svg>
     `)}`;
   };
@@ -368,9 +393,10 @@ export const CalendarIntegration: React.FC<CalendarIntegrationProps> = ({
                   <img 
                     src={meeting.qrCode} 
                     alt={`QR Code for ${meeting.title}`}
-                    className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-2"
+                    className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-2 border border-gray-300 rounded"
                   />
                   <p className="text-black text-xs font-medium">Scan to Join</p>
+                  <p className="text-gray-600 text-xs mt-1">Meeting ID: {meeting.id.slice(-6)}</p>
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
@@ -383,14 +409,14 @@ export const CalendarIntegration: React.FC<CalendarIntegrationProps> = ({
                   </button>
                   <button
                     onClick={() => downloadQRCode(meeting.qrCode, meeting.title)}
-                    className="p-2 bg-green-600 rounded-lg text-white hover:bg-green-700 transition-colors flex items-center justify-center space-x-1 text-xs"
+                    className="p-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700 transition-colors flex items-center justify-center space-x-1 text-xs"
                   >
-                    <Download className="w-3 h-3" />
-                    <span>QR Code</span>
+                    <QrCode className="w-3 h-3" />
+                    <span>Download QR</span>
                   </button>
                   <button
                     onClick={() => shareMeeting(meeting)}
-                    className="p-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700 transition-colors flex items-center justify-center space-x-1 text-xs"
+                    className="p-2 bg-green-600 rounded-lg text-white hover:bg-green-700 transition-colors flex items-center justify-center space-x-1 text-xs"
                   >
                     <Share2 className="w-3 h-3" />
                     <span>Share</span>
@@ -418,16 +444,16 @@ export const CalendarIntegration: React.FC<CalendarIntegrationProps> = ({
             <span className="text-gray-300">QR Code Generation</span>
           </div>
           <div className="flex items-center space-x-2">
+            <Scan className="w-4 h-4 text-purple-400" />
+            <span className="text-gray-300">QR Code Scanning</span>
+          </div>
+          <div className="flex items-center space-x-2">
             <Share2 className="w-4 h-4 text-blue-400" />
             <span className="text-gray-300">Smart Link Sharing</span>
           </div>
           <div className="flex items-center space-x-2">
             <Bot className="w-4 h-4 text-purple-400" />
             <span className="text-gray-300">AI Scheduling</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Shield className="w-4 h-4 text-green-400" />
-            <span className="text-gray-300">Quantum Security</span>
           </div>
         </div>
       </div>

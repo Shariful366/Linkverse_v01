@@ -11,6 +11,7 @@ import { QuantumMaps } from '../mapping/QuantumMaps';
 import { JobPlatform } from '../jobs/JobPlatform';
 import { HRTools } from '../hr/HRTools';
 import { RevolutionaryMeeting2050 } from '../meetings/RevolutionaryMeeting2050';
+import { QRMeetingJoin } from '../meetings/QRMeetingJoin';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const MainDashboard: React.FC = () => {
@@ -25,6 +26,7 @@ export const MainDashboard: React.FC = () => {
   const [showJobs, setShowJobs] = useState(false);
   const [showHR, setShowHR] = useState(false);
   const [showRevolutionaryMeeting, setShowRevolutionaryMeeting] = useState(false);
+  const [showQRJoin, setShowQRJoin] = useState(false);
   const { user } = useAuth();
 
   return (
@@ -41,6 +43,7 @@ export const MainDashboard: React.FC = () => {
             onShowJobs={() => setShowJobs(true)}
             onShowHR={() => setShowHR(true)}
             onShowRevolutionaryMeeting={() => setShowRevolutionaryMeeting(true)}
+            onShowQRJoin={() => setShowQRJoin(true)}
           />
         </div>
 
@@ -101,6 +104,16 @@ export const MainDashboard: React.FC = () => {
           <RevolutionaryMeeting2050 
             meetingId="quantum-meeting-2050"
             onClose={() => setShowRevolutionaryMeeting(false)} 
+          />
+        )}
+        
+        {showQRJoin && (
+          <QRMeetingJoin 
+            onJoinMeeting={(meetingId) => {
+              setShowQRJoin(false);
+              setShowRevolutionaryMeeting(true);
+            }}
+            onClose={() => setShowQRJoin(false)} 
           />
         )}
       </div>

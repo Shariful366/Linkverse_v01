@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, DollarSign, Calendar, FileText, TrendingUp, Brain, Zap, Shield, Clock, Award, Target, CreditCard, Building, User, Bot, Eye, Heart, MessageSquare, Settings, Download, Upload, Search, Filter, Plus, X, CheckCircle, AlertTriangle, MapPin, Phone, Mail } from 'lucide-react';
 import { AttendanceSystem } from './AttendanceSystem';
+import { HRCheckIn } from './HRCheckIn';
 
 interface HRToolsProps {
   onClose: () => void;
@@ -344,6 +345,7 @@ export const HRTools: React.FC<HRToolsProps> = ({ onClose }) => {
             {[
               { id: 'dashboard', label: 'Dashboard', icon: TrendingUp },
               { id: 'employees', label: 'Workforce', icon: Users },
+              { id: 'checkin', label: 'Check-In', icon: Clock },
               { id: 'attendance', label: 'Attendance', icon: Clock },
               { id: 'leave', label: 'Leave', icon: Calendar },
               { id: 'payroll', label: 'Payroll', icon: DollarSign },
@@ -369,6 +371,30 @@ export const HRTools: React.FC<HRToolsProps> = ({ onClose }) => {
         <div className="flex flex-col lg:flex-row h-full">
           {/* Main Content */}
           <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+            {/* Check-In Tab */}
+            {activeTab === 'checkin' && (
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                  <h2 className="text-lg sm:text-xl font-bold text-white">Employee Check-In System</h2>
+                  <div className="flex space-x-2">
+                    <button className="px-3 sm:px-4 py-2 bg-blue-600 rounded-lg text-white hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm">
+                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span>Live Tracking</span>
+                    </button>
+                    <button className="px-3 sm:px-4 py-2 bg-green-600 rounded-lg text-white hover:bg-green-700 transition-colors flex items-center space-x-2 text-sm">
+                      <Bot className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span>AI Analytics</span>
+                    </button>
+                  </div>
+                </div>
+                <HRCheckIn 
+                  onCheckInComplete={(data) => {
+                    console.log('Check-in completed:', data);
+                  }}
+                />
+              </div>
+            )}
+
             {/* Attendance Tab */}
             {activeTab === 'attendance' && (
               <AttendanceSystem 

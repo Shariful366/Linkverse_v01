@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Video, Bot, Shield, Settings, Users, Phone, Zap, LogOut, Headphones, Brain, MapPin, Briefcase, DollarSign, Sparkles } from 'lucide-react';
+import { MessageCircle, Video, Bot, Shield, Settings, Users, Phone, Zap, LogOut, Headphones, Brain, MapPin, Briefcase, DollarSign, Sparkles, QrCode } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
@@ -12,14 +12,16 @@ interface SidebarProps {
   onShowHR: () => void;
   onShowRevolutionaryMeeting: () => void;
   onShowComprehensiveAI: () => void;
+  onShowQRJoin: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onShowLiveStream, onShowAI, onShowSecurity, onShowAISupport, onShowMaps, onShowJobs, onShowHR, onShowRevolutionaryMeeting, onShowComprehensiveAI }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ onShowLiveStream, onShowAI, onShowSecurity, onShowAISupport, onShowMaps, onShowJobs, onShowHR, onShowRevolutionaryMeeting, onShowComprehensiveAI, onShowQRJoin }) => {
   const { user, logout } = useAuth();
 
   const menuItems = [
     { icon: MessageCircle, label: 'Chats', active: true },
     { icon: Sparkles, label: 'Quantum Meetings', onClick: onShowRevolutionaryMeeting },
+    { icon: QrCode, label: 'Join Meeting', onClick: onShowQRJoin },
     { icon: Video, label: 'Live Stream', onClick: onShowLiveStream },
     { icon: Bot, label: 'Vision AI', onClick: onShowAI },
     { icon: Shield, label: 'Security', onClick: onShowSecurity },
