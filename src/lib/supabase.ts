@@ -1,10 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://demo.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'demo-key';
-
-// Use demo mode if environment variables are not available
-const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://srucepdy vdxomjpbzzkky.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydWNlcGR5dmR4b21qcGJ6emt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5ODcxODEsImV4cCI6MjA2NzU2MzE4MX0.Kc30qmxlK5kvqeRvfkcytxREqfjjXeN6nNWU1EapStA';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -20,8 +17,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// Demo mode flag for components
-export const DEMO_MODE = isDemoMode;
 // Database Types
 export interface UserProfile {
   id: string;
@@ -55,109 +50,31 @@ export interface UserProfile {
   last_active: string;
   is_verified: boolean;
   is_premium: boolean;
+  phone?: string;
+  email_verified: boolean;
+  phone_verified: boolean;
+  account_type: 'individual' | 'enterprise';
+  enterprise_id?: string;
+  role: 'user' | 'admin' | 'enterprise_admin' | 'super_admin';
 }
 
-export interface ChatRoom {
+export interface Organization {
   id: string;
-  name?: string;
+  name: string;
   description?: string;
-  type: 'direct' | 'group' | 'channel' | 'ai_assistant';
-  avatar_url?: string;
-  is_private: boolean;
-  encryption_level: 'standard' | 'enterprise' | 'quantum';
-  auto_delete_messages: boolean;
-  auto_delete_duration?: string;
-  ai_moderation_enabled: boolean;
-  ai_translation_enabled: boolean;
-  ai_summary_enabled: boolean;
-  max_members: number;
-  member_count: number;
-  admin_only_messages: boolean;
-  created_by?: string;
-  created_at: string;
-  updated_at: string;
-  archived_at?: string;
-  is_active: boolean;
-}
-
-export interface Message {
-  id: string;
-  chat_room_id: string;
-  sender_id: string;
-  content?: string;
-  message_type: 'text' | 'image' | 'video' | 'audio' | 'file' | 'location' | 'contact' | 'ai_response';
-  media_url?: string;
-  media_metadata?: any;
-  ai_safety_score: number;
-  content_moderated: boolean;
-  moderation_reason?: string;
-  ai_generated: boolean;
-  reply_to_message_id?: string;
-  forwarded_from_message_id?: string;
-  edited_at?: string;
-  reactions: any;
-  smart_link_id?: string;
-  smart_link_expires_at?: string;
-  smart_link_password?: string;
-  smart_link_views: number;
-  created_at: string;
-  updated_at: string;
-  deleted_at?: string;
-  is_pinned: boolean;
-}
-
-export interface JobPosting {
-  id: string;
-  company_id?: string;
-  posted_by?: string;
-  title: string;
-  description: string;
-  requirements?: string[];
-  responsibilities?: string[];
-  location?: string;
-  work_type: 'remote' | 'hybrid' | 'onsite' | 'metaverse' | 'space';
-  employment_type: 'full_time' | 'part_time' | 'contract' | 'internship';
-  salary_min?: number;
-  salary_max?: number;
-  currency: string;
-  equity_percentage?: number;
-  benefits?: string[];
-  ai_match_enabled: boolean;
-  required_skills?: string[];
-  preferred_skills?: string[];
-  experience_level?: 'entry' | 'mid' | 'senior' | 'executive';
-  status: 'draft' | 'active' | 'paused' | 'closed' | 'expired';
-  application_count: number;
-  view_count: number;
-  created_at: string;
-  updated_at: string;
-  expires_at?: string;
-  is_urgent: boolean;
+  industry?: string;
+  size_category?: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  logo_url?: string;
+  banner_url?: string;
+  brand_colors?: any;
   is_verified: boolean;
-}
-
-export interface Meeting {
-  id: string;
-  title: string;
-  description?: string;
-  host_id: string;
-  meeting_type: 'video' | 'audio' | 'holographic' | 'ar' | 'metaverse';
-  scheduled_start: string;
-  scheduled_end: string;
-  actual_start?: string;
-  actual_end?: string;
-  max_participants: number;
-  requires_approval: boolean;
-  recording_enabled: boolean;
-  transcription_enabled: boolean;
-  translation_enabled: boolean;
-  security_level: 'standard' | 'enterprise' | 'quantum';
-  meeting_password?: string;
-  waiting_room_enabled: boolean;
-  ai_assistant_enabled: boolean;
-  sentiment_analysis_enabled: boolean;
-  auto_summary_enabled: boolean;
-  status: 'scheduled' | 'live' | 'ended' | 'cancelled';
+  is_premium: boolean;
+  quantum_security: boolean;
+  created_by: string;
   created_at: string;
   updated_at: string;
 }
@@ -165,6 +82,20 @@ export interface Meeting {
 // API Functions
 export const api = {
   // User Profile Management
+  async createUserProfile(userData: Partial<UserProfile>): Promise<UserProfile> {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .insert(userData)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating user profile:', error);
+      throw error;
+    }
+    return data;
+  },
+
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     const { data, error } = await supabase
       .from('user_profiles')
@@ -172,7 +103,10 @@ export const api = {
       .eq('user_id', userId)
       .single();
     
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching user profile:', error);
+      throw error;
+    }
     return data;
   },
 
@@ -184,194 +118,54 @@ export const api = {
       .select()
       .single();
     
-    if (error) throw error;
-    return data;
-  },
-
-  // Chat Management
-  async getChatRooms(userId: string): Promise<ChatRoom[]> {
-    const { data, error } = await supabase
-      .from('chat_rooms')
-      .select(`
-        *,
-        chat_room_members!inner(user_id)
-      `)
-      .eq('chat_room_members.user_id', userId)
-      .eq('chat_room_members.is_active', true);
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  async getMessages(chatRoomId: string, limit = 50): Promise<Message[]> {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .eq('chat_room_id', chatRoomId)
-      .order('created_at', { ascending: false })
-      .limit(limit);
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  async sendMessage(message: Partial<Message>): Promise<Message> {
-    const { data, error } = await supabase
-      .from('messages')
-      .insert(message)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Job Platform
-  async getJobPostings(filters?: any): Promise<JobPosting[]> {
-    let query = supabase
-      .from('job_postings')
-      .select('*')
-      .eq('status', 'active');
-    
-    if (filters?.work_type) {
-      query = query.eq('work_type', filters.work_type);
+    if (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
     }
-    
-    const { data, error } = await query.order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  async createJobPosting(jobData: Partial<JobPosting>): Promise<JobPosting> {
-    const { data, error } = await supabase
-      .from('job_postings')
-      .insert(jobData)
-      .select()
-      .single();
-    
-    if (error) throw error;
     return data;
   },
 
-  // Meeting Management
-  async getMeetings(userId: string): Promise<Meeting[]> {
+  // Organization Management
+  async createOrganization(orgData: Partial<Organization>): Promise<Organization> {
     const { data, error } = await supabase
-      .from('meetings')
+      .from('organizations')
+      .insert(orgData)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating organization:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  async getOrganization(orgId: string): Promise<Organization | null> {
+    const { data, error } = await supabase
+      .from('organizations')
       .select('*')
-      .or(`host_id.eq.${userId},id.in.(${await this.getUserMeetingIds(userId)})`)
-      .order('scheduled_start', { ascending: true });
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  async getUserMeetingIds(userId: string): Promise<string> {
-    const { data, error } = await supabase
-      .from('meeting_participants')
-      .select('meeting_id')
-      .eq('user_id', userId);
-    
-    if (error) return '';
-    return data.map(p => p.meeting_id).join(',') || '';
-  },
-
-  async createMeeting(meetingData: Partial<Meeting>): Promise<Meeting> {
-    const { data, error } = await supabase
-      .from('meetings')
-      .insert(meetingData)
-      .select()
+      .eq('id', orgId)
       .single();
     
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching organization:', error);
+      throw error;
+    }
     return data;
   },
 
-  // Location Sharing
-  async shareLocation(locationData: any): Promise<any> {
-    const { data, error } = await supabase
-      .from('location_shares')
-      .insert(locationData)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  async getLiveLocations(userId: string): Promise<any[]> {
-    const { data, error } = await supabase
-      .from('location_shares')
-      .select('*')
-      .contains('shared_with', [userId])
-      .gte('expires_at', new Date().toISOString());
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  // AI Conversations
-  async saveAIConversation(conversationData: any): Promise<any> {
-    const { data, error } = await supabase
-      .from('ai_conversations')
-      .insert(conversationData)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // File Management
-  async uploadFile(file: File, userId: string): Promise<string> {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}/${Date.now()}.${fileExt}`;
-    
-    const { data, error } = await supabase.storage
-      .from('files')
-      .upload(fileName, file);
-    
-    if (error) throw error;
-    
-    const { data: { publicUrl } } = supabase.storage
-      .from('files')
-      .getPublicUrl(fileName);
-    
-    // Save file metadata
-    await supabase
-      .from('file_storage')
-      .insert({
-        user_id: userId,
-        filename: file.name,
-        file_size: file.size,
-        mime_type: file.type,
-        file_url: publicUrl
-      });
-    
-    return publicUrl;
-  },
-
-  // Real-time Subscriptions
-  subscribeToMessages(chatRoomId: string, callback: (payload: any) => void) {
-    return supabase
-      .channel(`messages:${chatRoomId}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `chat_room_id=eq.${chatRoomId}`
-      }, callback)
-      .subscribe();
-  },
-
-  subscribeToLocationUpdates(userId: string, callback: (payload: any) => void) {
-    return supabase
-      .channel(`locations:${userId}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'location_shares'
-      }, callback)
-      .subscribe();
+  // Test connection
+  async testConnection(): Promise<boolean> {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('count')
+        .limit(1);
+      
+      return !error;
+    } catch (error) {
+      console.error('Connection test failed:', error);
+      return false;
+    }
   }
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Fingerprint, Smartphone, Mail, Eye, EyeOff, UserPlus, Building, Globe, Zap, Phone, AlertTriangle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Shield, Fingerprint, Smartphone, Mail, Eye, EyeOff, UserPlus, Building, Globe, Zap, Phone, AlertTriangle, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const LoginScreen: React.FC = () => {
@@ -25,10 +25,56 @@ export const LoginScreen: React.FC = () => {
 
   const { signUp, signIn, signInWithPhone, resetPassword, resendVerification, loading } = useAuth();
 
+  const validateForm = () => {
+    if (authMode === 'signup') {
+      if (!formData.displayName.trim()) {
+        setError('Display name is required');
+        return false;
+      }
+      if (!formData.username.trim()) {
+        setError('Username is required');
+        return false;
+      }
+      if (formData.username.length < 3) {
+        setError('Username must be at least 3 characters');
+        return false;
+      }
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters');
+        return false;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
+        return false;
+      }
+      if (!formData.acceptTerms) {
+        setError('Please accept the terms and conditions');
+        return false;
+      }
+      if (accountType === 'enterprise' && !formData.companyName.trim()) {
+        setError('Company name is required for enterprise accounts');
+        return false;
+      }
+      if (loginMethod === 'email' && !formData.email.trim()) {
+        setError('Email is required');
+        return false;
+      }
+      if (loginMethod === 'phone' && !formData.phone.trim()) {
+        setError('Phone number is required');
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+    
+    if (!validateForm()) {
+      return;
+    }
     
     try {
       if (authMode === 'login') {
@@ -38,27 +84,9 @@ export const LoginScreen: React.FC = () => {
           await signInWithPhone(formData.phone, formData.password);
         }
       } else if (authMode === 'signup') {
-        // Validation
-        if (formData.password !== formData.confirmPassword) {
-          setError('Passwords do not match');
-          return;
-        }
-        if (!formData.acceptTerms) {
-          setError('Please accept the terms and conditions');
-          return;
-        }
-        if (accountType === 'enterprise' && !formData.companyName) {
-          setError('Company name is required for enterprise accounts');
-          return;
-        }
-        if (!formData.email && !formData.phone) {
-          setError('Email or phone number is required');
-          return;
-        }
-
         await signUp({
-          email: formData.email || undefined,
-          phone: formData.phone || undefined,
+          email: loginMethod === 'email' ? formData.email : undefined,
+          phone: loginMethod === 'phone' ? formData.phone : undefined,
           password: formData.password,
           displayName: formData.displayName,
           username: formData.username,
@@ -79,6 +107,7 @@ export const LoginScreen: React.FC = () => {
         setSuccess('Password reset link sent to your email');
       }
     } catch (error: any) {
+      console.error('Auth error:', error);
       setError(error.message);
     }
   };
@@ -118,14 +147,14 @@ export const LoginScreen: React.FC = () => {
           {/* Error/Success Messages */}
           {error && (
             <div className="mb-4 p-3 bg-red-600/20 border border-red-500/30 rounded-lg flex items-center space-x-2">
-              <AlertTriangle className="w-4 h-4 text-red-400" />
+              <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
               <span className="text-red-300 text-sm">{error}</span>
             </div>
           )}
 
           {success && (
             <div className="mb-4 p-3 bg-green-600/20 border border-green-500/30 rounded-lg flex items-center space-x-2">
-              <CheckCircle className="w-4 h-4 text-green-400" />
+              <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
               <span className="text-green-300 text-sm">{success}</span>
             </div>
           )}
@@ -145,9 +174,17 @@ export const LoginScreen: React.FC = () => {
               <div className="space-y-3">
                 <button
                   onClick={handleResendVerification}
-                  className="w-full p-3 bg-blue-600 rounded-xl text-white hover:bg-blue-700 transition-colors"
+                  disabled={loading}
+                  className="w-full p-3 bg-blue-600 rounded-xl text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
-                  Resend Verification
+                  {loading ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Sending...</span>
+                    </div>
+                  ) : (
+                    'Resend Verification'
+                  )}
                 </button>
                 <button
                   onClick={() => setAuthMode('login')}
@@ -176,7 +213,14 @@ export const LoginScreen: React.FC = () => {
                 disabled={loading}
                 className="w-full p-3 sm:p-4 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-xl text-white font-semibold hover:from-cyan-700 hover:to-purple-700 transition-all disabled:opacity-50"
               >
-                {loading ? 'Sending...' : 'Send Reset Link'}
+                {loading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Sending...</span>
+                  </div>
+                ) : (
+                  'Send Reset Link'
+                )}
               </button>
               <button
                 type="button"
@@ -228,6 +272,7 @@ export const LoginScreen: React.FC = () => {
                   <h3 className="text-white font-semibold mb-3">Account Type</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
+                      type="button"
                       onClick={() => setAccountType('individual')}
                       className={`p-4 rounded-xl transition-all text-left ${
                         accountType === 'individual'
@@ -240,6 +285,7 @@ export const LoginScreen: React.FC = () => {
                       <p className="text-xs opacity-75">Personal account</p>
                     </button>
                     <button
+                      type="button"
                       onClick={() => setAccountType('enterprise')}
                       className={`p-4 rounded-xl transition-all text-left ${
                         accountType === 'enterprise'
@@ -258,6 +304,7 @@ export const LoginScreen: React.FC = () => {
               {/* Login Method Selector */}
               <div className="grid grid-cols-2 gap-2 mb-6">
                 <button
+                  type="button"
                   onClick={() => setLoginMethod('email')}
                   className={`p-3 rounded-xl transition-all ${
                     loginMethod === 'email' 
@@ -271,6 +318,7 @@ export const LoginScreen: React.FC = () => {
                   </div>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setLoginMethod('phone')}
                   className={`p-3 rounded-xl transition-all ${
                     loginMethod === 'phone' 
@@ -292,7 +340,7 @@ export const LoginScreen: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <input
                         type="text"
-                        placeholder="Display Name"
+                        placeholder="Display Name *"
                         value={formData.displayName}
                         onChange={(e) => setFormData({...formData, displayName: e.target.value})}
                         className="w-full p-3 sm:p-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors text-sm sm:text-base"
@@ -300,43 +348,43 @@ export const LoginScreen: React.FC = () => {
                       />
                       <input
                         type="text"
-                        placeholder="Username"
+                        placeholder="Username *"
                         value={formData.username}
-                        onChange={(e) => setFormData({...formData, username: e.target.value})}
+                        onChange={(e) => setFormData({...formData, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')})}
                         className="w-full p-3 sm:p-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors text-sm sm:text-base"
                         required
+                        minLength={3}
                       />
                     </div>
 
                     {/* Enterprise Fields */}
                     {accountType === 'enterprise' && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <>
                         <input
                           type="text"
-                          placeholder="Company Name"
+                          placeholder="Company Name *"
                           value={formData.companyName}
                           onChange={(e) => setFormData({...formData, companyName: e.target.value})}
                           className="w-full p-3 sm:p-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors text-sm sm:text-base"
                           required
                         />
-                        <input
-                          type="text"
-                          placeholder="Job Title"
-                          value={formData.jobTitle}
-                          onChange={(e) => setFormData({...formData, jobTitle: e.target.value})}
-                          className="w-full p-3 sm:p-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors text-sm sm:text-base"
-                        />
-                      </div>
-                    )}
-
-                    {accountType === 'enterprise' && (
-                      <input
-                        type="text"
-                        placeholder="Industry"
-                        value={formData.industry}
-                        onChange={(e) => setFormData({...formData, industry: e.target.value})}
-                        className="w-full p-3 sm:p-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors text-sm sm:text-base"
-                      />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <input
+                            type="text"
+                            placeholder="Job Title"
+                            value={formData.jobTitle}
+                            onChange={(e) => setFormData({...formData, jobTitle: e.target.value})}
+                            className="w-full p-3 sm:p-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors text-sm sm:text-base"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Industry"
+                            value={formData.industry}
+                            onChange={(e) => setFormData({...formData, industry: e.target.value})}
+                            className="w-full p-3 sm:p-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors text-sm sm:text-base"
+                          />
+                        </div>
+                      </>
                     )}
                   </>
                 )}
@@ -345,7 +393,7 @@ export const LoginScreen: React.FC = () => {
                 <div>
                   <input
                     type={loginMethod === 'email' ? 'email' : 'tel'}
-                    placeholder={loginMethod === 'email' ? 'Email address' : 'Phone number (+1234567890)'}
+                    placeholder={loginMethod === 'email' ? 'Email address *' : 'Phone number (+1234567890) *'}
                     value={loginMethod === 'email' ? formData.email : formData.phone}
                     onChange={(e) => setFormData({
                       ...formData,
@@ -360,11 +408,12 @@ export const LoginScreen: React.FC = () => {
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Password"
+                    placeholder="Password *"
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                     className="w-full p-3 sm:p-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors pr-12 text-sm sm:text-base"
                     required
+                    minLength={6}
                   />
                   <button
                     type="button"
@@ -380,11 +429,12 @@ export const LoginScreen: React.FC = () => {
                   <div className="relative">
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="Confirm Password"
+                      placeholder="Confirm Password *"
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                       className="w-full p-3 sm:p-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors pr-12 text-sm sm:text-base"
                       required
+                      minLength={6}
                     />
                     <button
                       type="button"
@@ -420,7 +470,7 @@ export const LoginScreen: React.FC = () => {
                 >
                   {loading ? (
                     <div className="flex items-center justify-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <Loader2 className="w-4 h-4 animate-spin" />
                       <span>
                         {authMode === 'login' ? 'Signing In...' : 
                          authMode === 'signup' ? 'Creating Account...' : 
@@ -446,6 +496,7 @@ export const LoginScreen: React.FC = () => {
               <div className="mt-6 space-y-3 text-center">
                 {authMode === 'login' && (
                   <button
+                    type="button"
                     onClick={() => setAuthMode('reset')}
                     className="text-cyan-400 hover:text-cyan-300 text-sm"
                   >
