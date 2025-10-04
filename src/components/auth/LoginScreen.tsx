@@ -8,8 +8,6 @@ export const LoginScreen: React.FC = () => {
   const [accountType, setAccountType] = useState<'individual' | 'enterprise'>('individual');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     phone: '',
@@ -23,56 +21,77 @@ export const LoginScreen: React.FC = () => {
     acceptTerms: false
   });
 
-  const { signUp, signIn, signInWithPhone, resetPassword, resendVerification, loading } = useAuth();
+  const { signUp, signIn, signInWithPhone, resetPassword, resendVerification, loading, error, clearError } = useAuth();
 
   const validateForm = () => {
+    clearError();
+    
     if (authMode === 'signup') {
       if (!formData.displayName.trim()) {
-        setError('Display name is required');
-        return false;
+        return 'Display name is required';
       }
       if (!formData.username.trim()) {
-        setError('Username is required');
-        return false;
+        return 'Username is required';
       }
       if (formData.username.length < 3) {
-        setError('Username must be at least 3 characters');
-        return false;
+        return 'Username must be at least 3 characters';
       }
       if (formData.password.length < 6) {
-        setError('Password must be at least 6 characters');
-        return false;
+        return 'Password must be at least 6 characters';
       }
       if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match');
-        return false;
+        return 'Passwords do not match';
       }
       if (!formData.acceptTerms) {
-        setError('Please accept the terms and conditions');
-        return false;
+        return 'Please accept the terms and conditions';
       }
       if (accountType === 'enterprise' && !formData.companyName.trim()) {
-        setError('Company name is required for enterprise accounts');
-        return false;
+        return 'Company name is required for enterprise accounts';
       }
       if (loginMethod === 'email' && !formData.email.trim()) {
-        setError('Email is required');
-        return false;
+        return 'Email is required';
       }
       if (loginMethod === 'phone' && !formData.phone.trim()) {
-        setError('Phone number is required');
-        return false;
+        return 'Phone number is required';
+      }
+      
+      // Email validation
+      if (loginMethod === 'email' && formData.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          return 'Please enter a valid email address';
+        }
+      }
+      
+      // Phone validation
+      if (loginMethod === 'phone' && formData.phone) {
+        const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+        if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+          return 'Please enter a valid phone number';
+        }
       }
     }
-    return true;
+    
+    if (authMode === 'login') {
+      if (loginMethod === 'email' && !formData.email.trim()) {
+        return 'Email is required';
+      }
+      if (loginMethod === 'phone' && !formData.phone.trim()) {
+        return 'Phone number is required';
+      }
+      if (!formData.password.trim()) {
+        return 'Password is required';
+      }
+    }
+    
+    return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
     
-    if (!validateForm()) {
+    const validationError = validateForm();
+    if (validationError) {
       return;
     }
     
@@ -97,27 +116,22 @@ export const LoginScreen: React.FC = () => {
         });
 
         setAuthMode('verify');
-        setSuccess('Account created! Please check your email/phone for verification.');
       } else if (authMode === 'reset') {
         if (!formData.email) {
-          setError('Email is required for password reset');
           return;
         }
         await resetPassword(formData.email);
-        setSuccess('Password reset link sent to your email');
       }
     } catch (error: any) {
       console.error('Auth error:', error);
-      setError(error.message);
     }
   };
 
   const handleResendVerification = async () => {
     try {
       await resendVerification(loginMethod);
-      setSuccess('Verification link resent!');
     } catch (error: any) {
-      setError(error.message);
+      console.error('Resend error:', error);
     }
   };
 
@@ -144,18 +158,11 @@ export const LoginScreen: React.FC = () => {
             </p>
           </div>
 
-          {/* Error/Success Messages */}
+          {/* Error Messages */}
           {error && (
             <div className="mb-4 p-3 bg-red-600/20 border border-red-500/30 rounded-lg flex items-center space-x-2">
               <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
               <span className="text-red-300 text-sm">{error}</span>
-            </div>
-          )}
-
-          {success && (
-            <div className="mb-4 p-3 bg-green-600/20 border border-green-500/30 rounded-lg flex items-center space-x-2">
-              <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-              <span className="text-green-300 text-sm">{success}</span>
             </div>
           )}
 
@@ -239,7 +246,10 @@ export const LoginScreen: React.FC = () => {
               {/* Auth Mode Toggle */}
               <div className="flex space-x-2 mb-6">
                 <button
-                  onClick={() => setAuthMode('login')}
+                  onClick={() => {
+                    setAuthMode('login');
+                    clearError();
+                  }}
                   className={`flex-1 p-3 rounded-xl transition-all text-sm sm:text-base ${
                     authMode === 'login' 
                       ? 'bg-cyan-600 text-white' 
@@ -252,7 +262,10 @@ export const LoginScreen: React.FC = () => {
                   </div>
                 </button>
                 <button
-                  onClick={() => setAuthMode('signup')}
+                  onClick={() => {
+                    setAuthMode('signup');
+                    clearError();
+                  }}
                   className={`flex-1 p-3 rounded-xl transition-all text-sm sm:text-base ${
                     authMode === 'signup' 
                       ? 'bg-purple-600 text-white' 

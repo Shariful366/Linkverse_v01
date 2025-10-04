@@ -11,6 +11,7 @@ export const Router: React.FC = () => {
     return <LoadingScreen />;
   }
 
+  // Only show dashboard if user is authenticated AND has a profile
   if (!user) {
     return <LoginScreen />;
   }
