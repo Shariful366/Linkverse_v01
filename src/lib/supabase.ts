@@ -7,12 +7,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
+    detectSessionInUrl: false
   },
-  realtime: {
-    params: {
-      eventsPerSecond: 10
+  global: {
+    headers: {
+      'X-Client-Info': 'linkverse-2050'
     }
   }
 });
