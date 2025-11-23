@@ -89,13 +89,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (error) {
         console.error('Supabase connection error:', error);
-        setError('Database connection failed');
+        setError(`Database connection failed: ${error.message}`);
       } else {
         console.log('Supabase connection successful');
+        setError(null);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Connection test failed:', error);
-      setError('Failed to connect to database');
+      setError(`Failed to connect to database: ${error.message}`);
     }
   };
 
@@ -123,9 +124,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.log('No profile found for user');
         setUser(null);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading user profile:', error);
-      setError('Failed to load user profile');
+      setError(`Failed to load user profile: ${error.message}`);
       setUser(null);
     } finally {
       setLoading(false);
@@ -160,10 +161,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('Company name is required for enterprise accounts');
       }
 
+      // Test connection before signup
+      await testConnection();
+      if (error) {
+        throw new Error('Database connection failed. Please try again.');
+      }
+
       // Prepare auth data
       const authData: any = {
         password: data.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             display_name: data.displayName,
             username: data.username,
@@ -182,12 +190,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         authData.phone = data.phone;
       }
 
-      console.log('Calling Supabase signUp...');
-      const { data: authResult, error } = await supabase.auth.signUp(authData);
+      console.log('Calling Supabase signUp with data:', {
+        email: data.email,
+        phone: data.phone,
+        hasPassword: !!data.password
+      });
 
-      if (error) {
-        console.error('Supabase signup error:', error);
-        throw new Error(error.message);
+      const { data: authResult, error: signUpError } = await supabase.auth.signUp(authData);
+
+      if (signUpError) {
+        console.error('Supabase signup error:', signUpError);
+        throw new Error(signUpError.message);
       }
 
       if (!authResult.user) {
@@ -227,33 +240,44 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
 
       console.log('Creating user profile...');
-      const profile = await api.createUserProfile(profileData);
-      console.log('Profile created:', profile.id);
+      try {
+        const profile = await api.createUserProfile(profileData);
+        console.log('Profile created:', profile.id);
+      } catch (profileError: any) {
+        console.error('Profile creation error:', profileError);
+        // Don't throw here - user account was created successfully
+      }
 
       // If enterprise account, create organization
       if (data.accountType === 'enterprise' && data.companyName) {
         console.log('Creating organization...');
-        const orgData = {
-          name: data.companyName,
-          industry: data.industry,
-          size_category: 'medium',
-          is_verified: false,
-          is_premium: true,
-          quantum_security: true,
-          created_by: authResult.user.id
-        };
+        try {
+          const orgData = {
+            name: data.companyName,
+            industry: data.industry,
+            size_category: 'medium',
+            is_verified: false,
+            is_premium: true,
+            quantum_security: true,
+            created_by: authResult.user.id
+          };
 
-        const organization = await api.createOrganization(orgData);
-        console.log('Organization created:', organization.id);
+          const organization = await api.createOrganization(orgData);
+          console.log('Organization created:', organization.id);
 
-        // Update user profile with enterprise_id
-        await api.updateUserProfile(authResult.user.id, {
-          enterprise_id: organization.id
-        });
+          // Update user profile with enterprise_id
+          await api.updateUserProfile(authResult.user.id, {
+            enterprise_id: organization.id
+          });
+        } catch (orgError: any) {
+          console.error('Organization creation error:', orgError);
+          // Don't throw here - user account was created successfully
+        }
       }
 
       // Show success message
-      alert('Account created successfully! Please check your email/phone for verification link.');
+      setError(null);
+      alert('Account created successfully! Please check your email for verification link.');
       
     } catch (error: any) {
       console.error('Signup error:', error);
@@ -270,14 +294,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('Signing in with email:', email);
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Test connection before signin
+      await testConnection();
+      if (error) {
+        throw new Error('Database connection failed. Please try again.');
+      }
+      
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      if (error) {
-        console.error('Sign in error:', error);
-        throw new Error(error.message);
+      if (signInError) {
+        console.error('Sign in error:', signInError);
+        throw new Error(signInError.message);
       }
 
       console.log('Sign in successful:', data.user?.id);
@@ -306,14 +336,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('Signing in with phone:', phone);
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Test connection before signin
+      await testConnection();
+      if (error) {
+        throw new Error('Database connection failed. Please try again.');
+      }
+      
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         phone,
         password
       });
 
-      if (error) {
-        console.error('Phone sign in error:', error);
-        throw new Error(error.message);
+      if (signInError) {
+        console.error('Phone sign in error:', signInError);
+        throw new Error(signInError.message);
       }
 
       if (data.user) {
@@ -338,8 +374,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setError(null);
     
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw new Error(error.message);
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) throw new Error(signOutError.message);
       setUser(null);
     } catch (error: any) {
       console.error('Sign out error:', error);
@@ -354,11 +390,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       if (type === 'email' && user?.email) {
-        const { error } = await supabase.auth.resend({
+        const { error: resendError } = await supabase.auth.resend({
           type: 'signup',
-          email: user.email
+          email: user.email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`
+          }
         });
-        if (error) throw new Error(error.message);
+        if (resendError) throw new Error(resendError.message);
+        alert('Verification email sent! Please check your inbox.');
       } else {
         throw new Error('Phone verification resend not implemented yet');
       }
@@ -372,10 +412,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setError(null);
     
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`
       });
-      if (error) throw new Error(error.message);
+      if (resetError) throw new Error(resetError.message);
+      alert('Password reset email sent! Please check your inbox.');
     } catch (error: any) {
       console.error('Reset password error:', error);
       setError(error.message || 'Failed to reset password');
