@@ -171,15 +171,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const authData: any = {
         password: data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: {
-            display_name: data.displayName,
-            username: data.username,
-            account_type: data.accountType,
-            company_name: data.companyName,
-            job_title: data.jobTitle,
-            industry: data.industry
-          }
+          emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       };
 
