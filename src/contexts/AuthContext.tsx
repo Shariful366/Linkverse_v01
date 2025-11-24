@@ -104,6 +104,77 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('Loading profile for user:', authUser.id);
       
+      // Check if this is a newly verified user with pending signup data
+      const pendingData = localStorage.getItem('pendingSignupData');
+      if (pendingData && authUser.email_confirmed_at) {
+        const signupData = JSON.parse(pendingData);
+        if (signupData.userId === authUser.id) {
+          console.log('Creating profile for newly verified user...');
+          
+          // Create user profile
+          const profileData = {
+            user_id: authUser.id,
+            username: signupData.username,
+            display_name: signupData.displayName,
+            account_type: signupData.accountType,
+            job_title: signupData.jobTitle,
+            company: signupData.companyName,
+            industry: signupData.industry,
+            role: signupData.accountType === 'enterprise' ? 'enterprise_admin' : 'user',
+            timezone: 'UTC',
+            language_preference: 'en',
+            theme_preference: 'dark',
+            security_level: signupData.accountType === 'enterprise' ? 'enterprise' : 'standard',
+            biometric_enabled: false,
+            geo_lock_enabled: false,
+            stealth_mode: false,
+            quantum_encryption: true,
+            ai_assistant_enabled: true,
+            wellness_monitoring: true,
+            mood_tracking: false,
+            ai_safety_score: 100,
+            experience_years: 0,
+            open_to_work: false,
+            is_verified: false,
+            is_premium: signupData.accountType === 'enterprise',
+            email_verified: true,
+            phone_verified: false
+          };
+
+          try {
+            const profile = await api.createUserProfile(profileData);
+            console.log('Profile created:', profile.id);
+            
+            // If enterprise account, create organization
+            if (signupData.accountType === 'enterprise' && signupData.companyName) {
+              console.log('Creating organization...');
+              const orgData = {
+                name: signupData.companyName,
+                industry: signupData.industry,
+                size_category: 'medium',
+                is_verified: false,
+                is_premium: true,
+                quantum_security: true,
+                created_by: authUser.id
+              };
+
+              const organization = await api.createOrganization(orgData);
+              console.log('Organization created:', organization.id);
+
+              // Update user profile with enterprise_id
+              await api.updateUserProfile(authUser.id, {
+                enterprise_id: organization.id
+              });
+            }
+            
+            // Clear pending data
+            localStorage.removeItem('pendingSignupData');
+          } catch (profileError: any) {
+            console.error('Profile creation error:', profileError);
+          }
+        }
+      }
+      
       const profile = await api.getUserProfile(authUser.id);
       
       if (profile) {
@@ -188,7 +259,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         hasPassword: !!data.password
       });
 
-      const { data: authResult, error: signUpError } = await supabase.auth.signUp(authData);
+      // First, try signup without any metadata to avoid trigger issues
+      const { data: authResult, error: signUpError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password
+      });
 
       if (signUpError) {
         console.error('Supabase signup error:', signUpError);
@@ -201,75 +276,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       console.log('Signup successful:', authResult.user.id);
 
-      // Create user profile
-      const profileData = {
-        user_id: authResult.user.id,
+      // Store signup data for later profile creation after email verification
+      localStorage.setItem('pendingSignupData', JSON.stringify({
+        userId: authResult.user.id,
         username: data.username,
-        display_name: data.displayName,
-        account_type: data.accountType,
-        job_title: data.jobTitle,
-        company: data.companyName,
-        industry: data.industry,
-        role: data.accountType === 'enterprise' ? 'enterprise_admin' : 'user',
-        timezone: 'UTC',
-        language_preference: 'en',
-        theme_preference: 'dark',
-        security_level: data.accountType === 'enterprise' ? 'enterprise' : 'standard',
-        biometric_enabled: false,
-        geo_lock_enabled: false,
-        stealth_mode: false,
-        quantum_encryption: true,
-        ai_assistant_enabled: true,
-        wellness_monitoring: true,
-        mood_tracking: false,
-        ai_safety_score: 100,
-        experience_years: 0,
-        open_to_work: false,
-        is_verified: false,
-        is_premium: data.accountType === 'enterprise',
-        email_verified: false,
-        phone_verified: false
-      };
-
-      console.log('Creating user profile...');
-      try {
-        const profile = await api.createUserProfile(profileData);
-        console.log('Profile created:', profile.id);
-      } catch (profileError: any) {
-        console.error('Profile creation error:', profileError);
-        // Don't throw here - user account was created successfully
-      }
-
-      // If enterprise account, create organization
-      if (data.accountType === 'enterprise' && data.companyName) {
-        console.log('Creating organization...');
-        try {
-          const orgData = {
-            name: data.companyName,
-            industry: data.industry,
-            size_category: 'medium',
-            is_verified: false,
-            is_premium: true,
-            quantum_security: true,
-            created_by: authResult.user.id
-          };
-
-          const organization = await api.createOrganization(orgData);
-          console.log('Organization created:', organization.id);
-
-          // Update user profile with enterprise_id
-          await api.updateUserProfile(authResult.user.id, {
-            enterprise_id: organization.id
-          });
-        } catch (orgError: any) {
-          console.error('Organization creation error:', orgError);
-          // Don't throw here - user account was created successfully
-        }
-      }
+        displayName: data.displayName,
+        accountType: data.accountType,
+        jobTitle: data.jobTitle,
+        companyName: data.companyName,
+        industry: data.industry
+      }));
 
       // Show success message
       setError(null);
-      alert('Account created successfully! Please check your email for verification link.');
+      console.log('Account created successfully! Please check your email for verification.');
       
     } catch (error: any) {
       console.error('Signup error:', error);
