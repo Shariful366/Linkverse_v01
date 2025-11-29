@@ -259,11 +259,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         hasPassword: !!data.password
       });
 
-      // First, try signup without any metadata to avoid trigger issues
-      const { data: authResult, error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password
-      });
+      // Extract options from authData
+      const { options, ...credentials } = authData;
+      
+      // Call signUp with proper credentials and options
+      const { data: authResult, error: signUpError } = await supabase.auth.signUp(
+        credentials,
+        options
+      );
 
       if (signUpError) {
         console.error('Supabase signup error:', signUpError);
